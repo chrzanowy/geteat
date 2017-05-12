@@ -1,5 +1,6 @@
 package com.geteat.service;
 
+import com.geteat.dto.WeatherDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,17 +18,17 @@ public class WeatherService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String getLocalizationForLatitudeAndLongitude(String latitude, String longitude) {
+    public WeatherDto getLocalizationForLatitudeAndLongitude(String latitude, String longitude) {
         Map<String, String> parameterMap = new HashMap<>();
         parameterMap.put("latitude", latitude);
         parameterMap.put("longitude", longitude);
         parameterMap.put("key", WEATHER_API_KEY);
-        String forObject = restTemplate
+        WeatherDto weatherResponse = restTemplate
                 .getForObject("http://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={key}&units=metric",
-                        String.class,
+                        WeatherDto.class,
                         parameterMap);
-        forObject.getClass();
-        return forObject;
+        weatherResponse.getClass();
+        return weatherResponse;
     }
 
 }

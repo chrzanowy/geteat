@@ -1,5 +1,6 @@
 package com.geteat.controller;
 
+import com.geteat.dto.WeatherDto;
 import com.geteat.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,7 @@ public class WeatherController {
     WeatherService weatherService;
 
     @RequestMapping(value = "/weather", method = RequestMethod.GET)
-    public String getLocalization(@RequestParam("latitude") String latitude, @RequestParam("longitude") String longitude) {
+    public WeatherDto getLocalization(@RequestParam("latitude") String latitude, @RequestParam("longitude") String longitude) {
         return weatherService.getLocalizationForLatitudeAndLongitude(latitude,longitude);
     }
 }

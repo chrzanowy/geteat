@@ -1,17 +1,22 @@
 package com.geteat.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * Created by Jake on 23.04.2017.
  */
+
+@Getter
+@NoArgsConstructor
 public class SubscribeDto {
     @JsonProperty
-    private final String email;
+    private String email;
     @JsonProperty
-    private final String city;
+    private String city;
     @JsonProperty
-    private final String state;
+    private String state;
 
 
     public SubscribeDto(String email, String city, String state) {

@@ -1,10 +1,10 @@
 package com.geteat.service;
 
 import com.geteat.dto.SubscribeDto;
+import com.geteat.exception.UserAlreadySubscribedException;
+import com.geteat.exception.UserNotExistingException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Jake on 23.04.2017.
@@ -12,11 +12,23 @@ import java.util.Map;
 @Service
 public class SubscriptionService {
 
-    public static final Map<String,String> subscribtionMap = new HashMap<>();
+    @Autowired
+    private UserService userService;
 
-    public void subscribe(SubscribeDto subscribeDto){
-
+    public void subscribe(SubscribeDto subscribeDto) throws UserAlreadySubscribedException {
+        if (!userService.isUserAlreadySubscribed(subscribeDto.getEmail())) {
+            userService.subscribeUser(subscribeDto);
+        } else {
+            throw new UserAlreadySubscribedException(subscribeDto.getEmail());
+        }
     }
 
 
+    public void unsubscribe(SubscribeDto subscribeDto) throws UserNotExistingException {
+        if (userService.isUserAlreadySubscribed(subscribeDto.getEmail())) {
+            userService.unsubscribeUser(subscribeDto);
+        } else {
+            throw new UserNotExistingException(subscribeDto.getEmail());
+        }
+    }
 }
