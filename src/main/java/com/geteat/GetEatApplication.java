@@ -1,15 +1,48 @@
 package com.geteat;
 
+import com.geteat.dao.SampleDao;
+import com.geteat.dao.impl.SampleDaoImpl;
+import com.geteat.service.SampleService;
+import com.geteat.service.SampleServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.h2.server.web.WebServlet;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.orm.hibernate4.HibernateTransactionManager;
+import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.sql.DataSource;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Properties;
 
 @SpringBootApplication(scanBasePackages = "com.geteat.*")
+@Configuration
+@PropertySource("classpath:dbConfig.properties")
+@EnableTransactionManagement
+@Slf4j
 public class GetEatApplication  extends SpringBootServletInitializer {
+
+    @Value("${hibernate.hibernateDialect}")
+    private String hibernateDialect;
+    @Value("${hibernate.showSQL}")
+    private String showSql;
+    @Value("${hibernate.generateStatistics}")
+    private String generateStatistics;
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -26,4 +59,75 @@ public class GetEatApplication  extends SpringBootServletInitializer {
 			System.out.println(beanName);
 		}
 	}
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
+
+    @Bean (name = "sampleDao")
+    public SampleDao sampleDao() throws IOException {
+        SampleDao sampleDao = new SampleDaoImpl();
+        sampleDao.sessionFactory(sessionFactory());
+        return sampleDao;
+    }
+
+
+    @Bean (name = "sampleService")
+    public SampleService sampleService(){
+        return new SampleServiceImpl();
+    }
+
+    @Bean(name = "sessionFactory")
+    public SessionFactory sessionFactory() throws IOException {
+        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
+        sessionFactoryBean.setDataSource(dataSource());
+        sessionFactoryBean.setPackagesToScan("com.geteat.*");
+        sessionFactoryBean.setAnnotatedPackages("com.geteat.*");
+        sessionFactoryBean.setHibernateProperties(getHibernateProperties());
+        sessionFactoryBean.afterPropertiesSet();
+        return sessionFactoryBean.getObject();
+    }
+
+    /**
+     * Spring provided H2 Embedded Database. Read the dbscript and initiates the Database with the name H2-Test-DB.
+     *
+     * @return
+     */
+    @Bean(name = "dataSource")
+    public DataSource dataSource(){
+        EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+        builder.setName("H2-Test-DB");
+        EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.H2)
+                .addScript("classpath:dbscript/my-schema.sql")
+                .addScript("classpath:dbscript/my-test-data.sql")
+                .build();
+        log.info("Initiating the database from dbscript.");
+        return db;
+    }
+
+
+    @Bean(name = "transactionManager")
+    public HibernateTransactionManager getTransactionManager() throws Exception {
+        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+        transactionManager.setSessionFactory(this.sessionFactory());
+        return transactionManager;
+    }
+
+    public Properties getHibernateProperties() {
+        Properties properties = new Properties();
+        properties.put("hibernate.dialect", hibernateDialect);
+        properties.put("hibernate.show_sql", showSql);
+        properties.put("hibernate.cache.use_second_level_cache", false);
+        properties.put("hibernate.generate_statistics", generateStatistics);
+        return properties;
+    }
+
+    @Bean
+    public ServletRegistrationBean h2servletRegistration() {
+        ServletRegistrationBean registration = new ServletRegistrationBean(new WebServlet());
+        registration.addUrlMappings("/console/*");
+        return registration;
+    }
+
 }

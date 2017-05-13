@@ -255,17 +255,16 @@ function MapaMain(){
             ,url: 'http://localhost:8080/weather?latitude='+ latitude +'&longitude=' + longitude
         }).done(function(dane) {
 
-            var odpowiedz = $.parseJSON(dane);
-
-            //console.log(odpowiedz);
+            console.log(dane);
+            var odpowiedz = dane;
 
             $('.temperatura').text(odpowiedz['main'].temp);
             $('.wiatr').text(odpowiedz['wind'].speed);
             $('.zachmurzenie').text(odpowiedz['clouds'].all);
             $('.cisnienie').text(odpowiedz['main'].pressure);
             $('.wilgotnosc').text(odpowiedz['main'].humidity);
-            $('.wschodSlonca').text(odpowiedz['sys'].sunrise);
-            $('.zachodSloncas').text(odpowiedz['sys'].sunset);
+            $('.wschodSlonca').text(mapaMain.formatujCzas(odpowiedz['sys'].sunrise));
+            $('.zachodSloncas').text(mapaMain.formatujCzas(odpowiedz['sys'].sunset));
 
 			$('#myModal').modal('show');
 			$('#pogodaMiasto').text(lokalizacjaDane['miejscowosc']);
@@ -274,6 +273,16 @@ function MapaMain(){
             console.log(ajaxContext.responseText);
         });
 	};
+
+	this.formatujCzas = function(time){
+	    var formatedDate = new Date(0);
+        formatedDate.setUTCSeconds(time);
+	    return this.wiodaceZero(formatedDate.getHours()) + ":"+ this.wiodaceZero(formatedDate.getMinutes());
+	};
+
+	this.wiodaceZero = function(time){
+    	    return (time<10)? '0'+time : time;
+    	};
 }
 mapaMain = new MapaMain();
 var wartosc;
