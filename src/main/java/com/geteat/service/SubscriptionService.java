@@ -5,6 +5,7 @@ import com.geteat.exception.UserAlreadySubscribedException;
 import com.geteat.exception.UserNotExistingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by Jake on 23.04.2017.
@@ -28,7 +29,7 @@ public class SubscriptionService {
 
 
     public void unsubscribe(SubscribeDto subscribeDto) throws UserNotExistingException {
-        if (userService.isUserAlreadySubscribed(subscribeDto.getEmail())) {
+        if (!userService.isUserAlreadySubscribed(subscribeDto.getEmail())) {
             userService.unsubscribeUser(subscribeDto);
         } else {
             throw new UserNotExistingException(subscribeDto.getEmail());

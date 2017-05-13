@@ -1,1 +1,1 @@
-INSERT INTO SAMPLE(SID, NAME, ADDRESS) VALUES(100, 'Avol', 'AP');
+INSERT INTO USERS(UID, EMAIL, CITY, STATE) VALUES(100, 'email@co.co', 'wroclaw', 'dolnoslaskie');

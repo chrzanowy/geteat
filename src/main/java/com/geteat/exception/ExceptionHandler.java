@@ -1,4 +1,4 @@
-package com.geteat.service;
+package com.geteat.exception;
 
 import com.geteat.exception.UserAlreadySubscribedException;
 import com.geteat.exception.UserNotExistingException;

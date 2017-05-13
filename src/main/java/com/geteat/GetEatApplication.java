@@ -1,9 +1,5 @@
 package com.geteat;
 
-import com.geteat.dao.SampleDao;
-import com.geteat.dao.impl.SampleDaoImpl;
-import com.geteat.service.SampleService;
-import com.geteat.service.SampleServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.server.web.WebServlet;
 import org.hibernate.SessionFactory;
@@ -21,8 +17,9 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.orm.hibernate4.HibernateTransactionManager;
-import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
@@ -34,8 +31,9 @@ import java.util.Properties;
 @Configuration
 @PropertySource("classpath:dbConfig.properties")
 @EnableTransactionManagement
+@Repository
 @Slf4j
-public class GetEatApplication  extends SpringBootServletInitializer {
+public class GetEatApplication extends SpringBootServletInitializer {
 
     @Value("${hibernate.hibernateDialect}")
     private String hibernateDialect;
@@ -44,38 +42,25 @@ public class GetEatApplication  extends SpringBootServletInitializer {
     @Value("${hibernate.generateStatistics}")
     private String generateStatistics;
 
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(GetEatApplication.class);
-	}
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(GetEatApplication.class);
+    }
 
-	public static void main(String[] args) {
-		ConfigurableApplicationContext ctx = SpringApplication.run(GetEatApplication.class, args);
-		System.out.println("Let's inspect the beans provided by Spring Boot:");
+    public static void main(String[] args) {
+        ConfigurableApplicationContext ctx = SpringApplication.run(GetEatApplication.class, args);
+        System.out.println("Let's inspect the beans provided by Spring Boot:");
 
-		String[] beanNames = ctx.getBeanDefinitionNames();
-		Arrays.sort(beanNames);
-		for (String beanName : beanNames) {
-			System.out.println(beanName);
-		}
-	}
+        String[] beanNames = ctx.getBeanDefinitionNames();
+        Arrays.sort(beanNames);
+        for (String beanName : beanNames) {
+            System.out.println(beanName);
+        }
+    }
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
-    }
-
-    @Bean (name = "sampleDao")
-    public SampleDao sampleDao() throws IOException {
-        SampleDao sampleDao = new SampleDaoImpl();
-        sampleDao.sessionFactory(sessionFactory());
-        return sampleDao;
-    }
-
-
-    @Bean (name = "sampleService")
-    public SampleService sampleService(){
-        return new SampleServiceImpl();
     }
 
     @Bean(name = "sessionFactory")
@@ -95,12 +80,13 @@ public class GetEatApplication  extends SpringBootServletInitializer {
      * @return
      */
     @Bean(name = "dataSource")
-    public DataSource dataSource(){
+    public DataSource dataSource() {
         EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
         builder.setName("H2-Test-DB");
         EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.H2)
                 .addScript("classpath:dbscript/my-schema.sql")
                 .addScript("classpath:dbscript/my-test-data.sql")
+                .addScript("classpath:dbscript/h2.sql")
                 .build();
         log.info("Initiating the database from dbscript.");
         return db;
@@ -118,6 +104,8 @@ public class GetEatApplication  extends SpringBootServletInitializer {
         Properties properties = new Properties();
         properties.put("hibernate.dialect", hibernateDialect);
         properties.put("hibernate.show_sql", showSql);
+        properties.put("connection.driver_class", "org.h2.Driver");
+        properties.put("hibernate.connection.url", "jdbc:h2:~/test");
         properties.put("hibernate.cache.use_second_level_cache", false);
         properties.put("hibernate.generate_statistics", generateStatistics);
         return properties;

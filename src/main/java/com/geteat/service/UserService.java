@@ -1,8 +1,13 @@
 package com.geteat.service;
 
+import com.geteat.dao.UserDao;
 import com.geteat.dto.SubscribeDto;
+import com.geteat.exception.UserAlreadySubscribedException;
+import com.geteat.exception.UserNotExistingException;
 import com.geteat.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,18 +18,27 @@ import java.util.Map;
 @Service
 public class UserService {
 
-    private Map<String,User> userMap = new HashMap<>();
+    private Map<String, User> userMap = new HashMap<>();
+
+    @Autowired
+    private UserDao userDao;
 
     public boolean isUserAlreadySubscribed(String email) {
-        return userMap.containsKey(email);
+        return false;
     }
 
-    public User subscribeUser(SubscribeDto subscribeDto) {
-        return userMap.put(subscribeDto.getEmail(), new User(subscribeDto.getEmail(), subscribeDto.getCity(),
-                subscribeDto.getState()));
+    @Transactional
+    @javax.transaction.Transactional
+    public User subscribeUser(SubscribeDto subscribeDto) throws UserAlreadySubscribedException {
+        User user = new User(subscribeDto.getEmail(), subscribeDto.getCity(),
+                subscribeDto.getState());
+        userDao.persist(user);
+        return user;
     }
 
-    public User unsubscribeUser(SubscribeDto subscribeDto) {
-        return userMap.remove(subscribeDto.getEmail());
+    @Transactional
+    @javax.transaction.Transactional
+    public void unsubscribeUser(SubscribeDto subscribeDto) throws UserNotExistingException {
+        userDao.deleteByEmail(subscribeDto.getEmail());
     }
 }
