@@ -15,6 +15,9 @@ public class SubscriptionService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RsoService rsoService;
+
     public void subscribe(SubscribeDto subscribeDto) throws UserAlreadySubscribedException {
         if (!userService.isUserAlreadySubscribed(subscribeDto.getEmail())) {
             userService.subscribeUser(subscribeDto);
