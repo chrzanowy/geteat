@@ -1,4 +1,4 @@
-package com.geteat.dto;
+package com.geteat.dto.weather;
 
 /**
  * Created by Kuba on 2017-05-12.

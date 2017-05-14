@@ -32,6 +32,7 @@ public class UserDaoImpl implements UserDao {
         Optional<User> byEmail = findByEmail(user.getEmail());
         if (!byEmail.isPresent()) {
             entityManager.persist(user);
+            log.info("User %s saved in db", user.getEmail());
         } else {
             throw new UserAlreadySubscribedException(user.getEmail());
         }
@@ -91,6 +92,7 @@ public class UserDaoImpl implements UserDao {
         Optional<User> byEmail = findByEmail(email);
         if (byEmail.isPresent()) {
             entityManager.remove(byEmail.get());
+            log.info("User %s deleted from db", email);
         } else {
             throw new UserNotExistingException(email);
         }

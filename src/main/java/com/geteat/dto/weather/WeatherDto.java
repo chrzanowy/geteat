@@ -1,4 +1,4 @@
-package com.geteat.dto;
+package com.geteat.dto.weather;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -22,7 +22,8 @@ public class WeatherDto {
     public Rain rain;
     @JsonProperty("sys")
     public Sys sys;
-
+    @JsonProperty("dt_txt")
+    public String forecastDate;
 
     @JsonPropertyOrder({
             "3h"

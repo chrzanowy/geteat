@@ -283,7 +283,65 @@ function MapaMain(){
 	this.wiodaceZero = function(time){
     	    return (time<10)? '0'+time : time;
     	};
+
+    this.zapiszSubskrypcje = function(email, miejscowosc, wojewodztwo){
+        var formData = new FormData();
+            formData.append('email' , email);
+            formData.append('city' , "cuty");
+            formData.append('state' , "state");
+
+        $.ajax({
+                type: 'POST'
+                ,url: 'http://localhost:8080/subscribe'
+                ,data : formData
+                    ,dataType: 'json'
+                    ,cache : false
+                    ,processData: false
+                    ,contentType: "application/json"
+            }).done(function(dane) {
+
+                mapaMain.ustawCookie('pogoda_subskrypcja', email, 365);
+                mapaMain.ustawCookie('miasto_subskrypcja', miejscowosc, 365);
+                $('.zapiszSubskrypcje').hide();
+                $('.usunSubskrypcje').show();
+                mapaMain.wyswietlPowiadomienie('Zostałeś zapisany do subskrypcji.','success');
+
+            }).fail(function(ajaxContext) {
+                console.log(ajaxContext.responseText);
+            });
+    };
+
+
+    this.usunSubsktypcje = function(){
+        var formData = new FormData();
+                formData.append('email' , email);
+
+            $.ajax({
+                    type: 'DELETE'
+                    ,url: 'http://localhost:8080/subscribe'
+                    ,data : formData
+                    ,dataType: 'json'
+                    ,cache : false
+                    ,processData: false
+                                        ,contentType: "application/json"
+            }).done(function(dane) {
+
+                 $('#email').val('');
+                pogoda_subskrypcja = '';
+                miasto_subskrypcja = '';
+                mapaMain.ustawCookie('pogoda_subskrypcja', '', 365);
+                mapaMain.ustawCookie('miasto_subskrypcja', '', 365);
+                $('.zapiszSubskrypcje').show();
+                $('.usunSubskrypcje').hide();
+                mapaMain.wyswietlPowiadomienie('Zostałeś usunięty ze subskrypcji.','success');
+
+            }).fail(function(ajaxContext) {
+                console.log(ajaxContext.responseText);
+            });
+
+    }
 }
+
 mapaMain = new MapaMain();
 var wartosc;
 var pogoda_subskrypcja = mapaMain.pobierzCookie('pogoda_subskrypcja');
@@ -368,38 +426,42 @@ $(document).on('click','.zapiszSubskrypcje',function(){
 	var longitude = $('#longitude').val();
 	var wojewodztwo = $('#wojewodztwo').val();
 	var email = $('#email').val();
-	
+
 	if(!mapaMain.sprawdzEmail(email)){
 		mapaMain.wyswietlPowiadomienie('Wprowadź poprawny adres email!','danger');
 		return;
 	}
-	
+
 	if(email === ''){
 		mapaMain.wyswietlPowiadomienie('Wprowadź adres email!','danger');
 		return;
 	}
-	
+
 	if(miejscowosc === '' || latitude === '' || longitude === '' || wojewodztwo === ''){
 		mapaMain.wyswietlPowiadomienie('Wybierz lokalizacje!','danger');
 		return;
 	}
-	
-	mapaMain.ustawCookie('pogoda_subskrypcja', email, 365);
-	mapaMain.ustawCookie('miasto_subskrypcja', miejscowosc, 365);
-	$('.zapiszSubskrypcje').hide();
-	$('.usunSubskrypcje').show();
-	mapaMain.wyswietlPowiadomienie('Zostałeś zapisany do subskrypcji.','success');
+
+	mapaMain.zapiszSubskrypcje(email, miejscowosc, wojewodztwo);
+
+
 });
 
 $(document).on('click','.usunSubskrypcje',function(){
-	$('#email').val('');
-	pogoda_subskrypcja = '';
-	miasto_subskrypcja = '';
-	mapaMain.ustawCookie('pogoda_subskrypcja', '', 365);
-	mapaMain.ustawCookie('miasto_subskrypcja', '', 365);
-	$('.zapiszSubskrypcje').show();
-	$('.usunSubskrypcje').hide();
-	mapaMain.wyswietlPowiadomienie('Zostałeś usunięty ze subskrypcji.','success');
+    var email = $('#email').val();
+
+	if(!mapaMain.sprawdzEmail(email)){
+		mapaMain.wyswietlPowiadomienie('Wprowadź poprawny adres email!','danger');
+		return;
+	}
+
+	if(email === ''){
+		mapaMain.wyswietlPowiadomienie('Wprowadź adres email!','danger');
+		return;
+	}
+
+    mapaMain.usunSubskrypcje(email);
+
 });
 
 $(document).on('keypress','#email', function(event) {

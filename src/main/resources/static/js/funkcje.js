@@ -283,7 +283,87 @@ function MapaMain(){
 	this.wiodaceZero = function(time){
     	    return (time<10)? '0'+time : time;
     	};
+
+    this.zapiszSubskrypcje = function(email, miejscowosc, wojewodztwo){
+
+
+            var formData = {
+                'email' : email
+                ,'city' : mapaMain.usunPolskieZnaki(miejscowosc.toLowerCase())
+                ,'state' : mapaMain.usunPolskieZnaki(wojewodztwo.toLowerCase())
+            }
+
+        $.ajax({
+                type: 'POST'
+                ,url: 'http://localhost:8080/subscribe'
+                ,data : JSON.stringify(formData)
+                    ,dataType: 'json'
+                    ,cache : false
+                    ,processData: false
+                    ,contentType: "application/json"
+                    ,statusCode: {
+                        400: function() {
+                          mapaMain.ustawCookie('pogoda_subskrypcja', email, 365);
+                          mapaMain.ustawCookie('miasto_subskrypcja', miejscowosc, 365);
+                          $('.zapiszSubskrypcje').hide();
+                          $('.usunSubskrypcje').show();
+                          mapaMain.wyswietlPowiadomienie('Adres email jest zapisany do subskrypcji','danger');
+                        },
+                        201: function(){
+                            mapaMain.ustawCookie('pogoda_subskrypcja', email, 365);
+                            mapaMain.ustawCookie('miasto_subskrypcja', miejscowosc, 365);
+                            $('.zapiszSubskrypcje').hide();
+                            $('.usunSubskrypcje').show();
+                            mapaMain.wyswietlPowiadomienie('Zostałeś zapisany do subskrypcji.','success');
+                        }
+                      }
+            }).done().fail(function(ajaxContext) {
+                console.log(ajaxContext.responseText);
+            });
+    };
+
+
+    this.usunSubsktypcje = function(email){
+        var formData = {
+                        'email' : email
+                    }
+
+            $.ajax({
+                    type: 'DELETE'
+                    ,url: 'http://localhost:8080/subscribe'
+                    ,data : JSON.stringify(formData)
+                    ,dataType: 'json'
+                    ,cache : false
+                    ,processData: false
+                    ,contentType: "application/json"
+                    ,statusCode: {
+                        200: function() {
+                          $('#email').val('');
+                          pogoda_subskrypcja = '';
+                          miasto_subskrypcja = '';
+                          mapaMain.ustawCookie('pogoda_subskrypcja', '', 365);
+                          mapaMain.ustawCookie('miasto_subskrypcja', '', 365);
+                          $('.zapiszSubskrypcje').show();
+                          $('.usunSubskrypcje').hide();
+                          mapaMain.wyswietlPowiadomienie('Zostałeś usunięty ze subskrypcji.','success');
+                        },
+                        400 : function(){
+                              pogoda_subskrypcja = '';
+                              miasto_subskrypcja = '';
+                              mapaMain.ustawCookie('pogoda_subskrypcja', '', 365);
+                              mapaMain.ustawCookie('miasto_subskrypcja', '', 365);
+                              $('.zapiszSubskrypcje').show();
+                              $('.usunSubskrypcje').hide();
+                              mapaMain.wyswietlPowiadomienie('Najpierw musisz sie zapisac do subskrypcji.','danger');
+                        }
+                      }
+            }).done().fail(function(ajaxContext) {
+                console.log(ajaxContext.responseText);
+            });
+
+    };
 }
+
 mapaMain = new MapaMain();
 var wartosc;
 var pogoda_subskrypcja = mapaMain.pobierzCookie('pogoda_subskrypcja');
@@ -368,38 +448,42 @@ $(document).on('click','.zapiszSubskrypcje',function(){
 	var longitude = $('#longitude').val();
 	var wojewodztwo = $('#wojewodztwo').val();
 	var email = $('#email').val();
-	
+
 	if(!mapaMain.sprawdzEmail(email)){
 		mapaMain.wyswietlPowiadomienie('Wprowadź poprawny adres email!','danger');
 		return;
 	}
-	
+
 	if(email === ''){
 		mapaMain.wyswietlPowiadomienie('Wprowadź adres email!','danger');
 		return;
 	}
-	
+
 	if(miejscowosc === '' || latitude === '' || longitude === '' || wojewodztwo === ''){
 		mapaMain.wyswietlPowiadomienie('Wybierz lokalizacje!','danger');
 		return;
 	}
-	
-	mapaMain.ustawCookie('pogoda_subskrypcja', email, 365);
-	mapaMain.ustawCookie('miasto_subskrypcja', miejscowosc, 365);
-	$('.zapiszSubskrypcje').hide();
-	$('.usunSubskrypcje').show();
-	mapaMain.wyswietlPowiadomienie('Zostałeś zapisany do subskrypcji.','success');
+
+	mapaMain.zapiszSubskrypcje(email, miejscowosc, wojewodztwo);
+
+
 });
 
 $(document).on('click','.usunSubskrypcje',function(){
-	$('#email').val('');
-	pogoda_subskrypcja = '';
-	miasto_subskrypcja = '';
-	mapaMain.ustawCookie('pogoda_subskrypcja', '', 365);
-	mapaMain.ustawCookie('miasto_subskrypcja', '', 365);
-	$('.zapiszSubskrypcje').show();
-	$('.usunSubskrypcje').hide();
-	mapaMain.wyswietlPowiadomienie('Zostałeś usunięty ze subskrypcji.','success');
+    var email = $('#email').val();
+
+	if(!mapaMain.sprawdzEmail(email)){
+		mapaMain.wyswietlPowiadomienie('Wprowadź poprawny adres email!','danger');
+		return;
+	}
+
+	if(email === ''){
+		mapaMain.wyswietlPowiadomienie('Wprowadź adres email!','danger');
+		return;
+	}
+
+    mapaMain.usunSubsktypcje(email);
+
 });
 
 $(document).on('keypress','#email', function(event) {

@@ -22,10 +22,13 @@ public class IntegrationService {
     private WeatherService weatherService;
     @Autowired
     private RsoService rsoService;
+    @Autowired
+    private MailSenderService mailService;
 
     public void sendWeatherForecast() {
-        List allCities = userDao.findAllCities();
+        List<String> allCities = userDao.findAllCities();
         weatherService.fetchWeatherForCities(allCities);
+        //TODO send mails
     }
 
     public void fetchLatestRso() {

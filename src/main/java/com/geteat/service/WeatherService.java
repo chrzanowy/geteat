@@ -1,6 +1,7 @@
 package com.geteat.service;
 
-import com.geteat.dto.WeatherDto;
+import com.geteat.dto.weather.ForecastDto;
+import com.geteat.dto.weather.WeatherDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -32,7 +33,19 @@ public class WeatherService {
         return weatherResponse;
     }
 
-    public void fetchWeatherForCities(List allCities) {
-        this.getClass();
+    public Map<String, ForecastDto> fetchWeatherForCities(List<String> allCities) {
+        Map<String, ForecastDto> forecastMap = new HashMap<>();
+        allCities.forEach((city) -> {
+            Map<String, String> parameterMap = new HashMap<>();
+            parameterMap.put("key", WEATHER_API_KEY);
+            parameterMap.put("city", city);
+            ForecastDto weatherResponse = restTemplate
+                    .getForObject("http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={key}&units=metric",
+                            ForecastDto.class,
+                            parameterMap);
+            forecastMap.put(city, weatherResponse);
+
+        });
+        return forecastMap;
     }
 }

@@ -1,6 +1,6 @@
 package com.geteat.controller;
 
-import com.geteat.dto.WeatherDto;
+import com.geteat.dto.weather.WeatherDto;
 import com.geteat.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,7 +1,7 @@
 package com.geteat.service;
 
 import com.geteat.dao.UserDao;
-import com.geteat.dto.SubscribeDto;
+import com.geteat.dto.subscription.SubscribeDto;
 import com.geteat.exception.UserAlreadySubscribedException;
 import com.geteat.exception.UserNotExistingException;
 import com.geteat.model.User;
@@ -22,10 +22,6 @@ public class UserService {
 
     @Autowired
     private UserDao userDao;
-
-    public boolean isUserAlreadySubscribed(String email) {
-        return false;
-    }
 
     @Transactional
     @javax.transaction.Transactional

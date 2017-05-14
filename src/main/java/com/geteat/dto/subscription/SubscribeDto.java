@@ -1,4 +1,4 @@
-package com.geteat.dto;
+package com.geteat.dto.subscription;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
